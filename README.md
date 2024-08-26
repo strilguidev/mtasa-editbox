@@ -39,4 +39,4 @@ editBoxSetAttribute('user', 'pos', {30, 10, 120, 50});
 ```
 
 # License
-#### You can use this framework in all your projects. Feel free to edit aswell!
+#### You can use this lib in all your projects. Feel free to edit aswell!
