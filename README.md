@@ -1,5 +1,5 @@
 # mtasa-editbox
-Framework which allows you to create custom dx editbox.
+Lib which allows you to create custom dx editbox.
 
 ## Functions
 ``create``
