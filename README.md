@@ -2,67 +2,40 @@
 Framework which allows you to create custom dx editbox.
 
 ## Functions
-``new``
+``create``
 ##### Create a new instance and a editbox.
 ```lua
 createEditBox(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
 ```
 ##### Exemple:
 ```lua
-createEditBox('user', {x, y, w, h}, 'Type something...', {default = {255, 255, 255, 25}, selected = {255, 255, 255, 255}}, 25, false, false, 'center', 'center', 'default')
+createEditBox('user', {10, 10, 120, 50}, 'Type something...', {default = {255, 255, 255, 25}, selected = {255, 255, 255, 255}}, 25, false, false, 'center', 'center', 'default')
 ```
 
-``destroy``
-##### Destroy the instance.
+``delete``
+##### Delete the instance.
 ```lua
-dxEditBox:destroy()
+deleteEditBox(id)
+```
+##### Exemple:
+```lua
+deleteEditBox('user')
 ```
 
-``destroyAll``
-##### This function destroy all instance.
+``deleteAll``
+##### This function delete all instance.
 ```lua
-dxEditBox:destroyAll()
+deleteAllEditBox()
 ```
 
-``setText``
-##### This function set new text in editbox.
+``setAttribute``
+##### This function set new attributes in editbox.
 ```lua
-dxEditBox:setText(text)
+editBoxSetAttribute(id, attributes, value)
 ```
-
-``getText``
-##### This function get the text in editbox.
+#### exemple:
 ```lua
-dxEditBox:getText()
-```
-
-``setVisible``
-##### It makes the dxEditBox visible or not.
-```lua
-dxEditBox:setVisible(bool)
-```
-
-``resetAllText``
-##### This function resets all dxEditBox text.
-```lua
-dxEditBox:resetAllText()
-```
-
-# Usage
-```lua
-
-local editbox
-
-local screenW, screenH = guiGetScreenSize()
-
-local function togglePanel()
-    if not editbox then 
-        editbox = dxEditBox.new(0, 0, screenW / 2, screenH / 2, "teste", "text", 100, false, true) --// Create an instance
-    else
-        editbox:destroy() --// Destroy instance
-    end
-end
-
+editBoxSetAttribute('user', 'pos', {30, 10, 120, 50});
 ```
 
 # License
