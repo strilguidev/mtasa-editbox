@@ -1,4 +1,4 @@
-local screenW, screenH = guiGetScreenSize();
+local screen = Vector2(guiGetScreenSize());
 
 local numbersKeys = {
     ["0"] = true, ["1"] = true, ["2"] = true, ["3"] = true, ["4"] = true,
@@ -15,41 +15,64 @@ local textKeys = {
     ["?"] = false, ["$"] = false, ["#"] = false, ["&"] = false, ["@"] = false, ["+"] = false, ["="] = false, ["("] = false, [")"] = false, ["%"] = false
 };
 
-Main = { }
+Editbox = { };
 
-function Main:construction()
-    self.cache = { }
-    self.selected = false
-
-    self.events = {
-        __render__ = function()
-            return self:render()
-        end,
-
-        __inserttext__ = function(character)
-            return self:character(character)
-        end,
-
-        __clickKey__ =  function(b, s)
-            return self:clickKey(b, s)
-        end,
-
-        __onClick__ = function(b, s)
-            return self:click(b, s)
-        end
-    }
-
-    addEventHandler('onClientRender', root, self.events['__render__'])
-    addEventHandler('onClientClick', root, self.events['__onClick__'])
-    addEventHandler('onClientCharacter', root, self.events['__inserttext__'])
-    addEventHandler('onClientKey', root, self.events['__clickKey__'])
-
+function Editbox:construction()
+    self.cache = {};
+    self.selected = false;
+    self.button = false;
+    self.events = false;
+    
     return self;
 end;
 
-function Main:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
-    if (not self.cache) then self.cache = {} end;
+function Editbox:draw(id)
+    local editbox = self.cache[id];
+    if (not editbox) then return false end;
+    
+    local x, y, w, h = editbox.pos[1], editbox.pos[2], editbox.pos[3], editbox.pos[4];
+    
+    
+    dxDrawText(
+    (editbox.text == '' and editbox.defaultText or 
+    (editbox.password and string.gsub(editbox.text, '.', '*') or editbox.text)),
+    x, y, w, h, 
+    (editbox.selected and tocolor(editbox.color['selected'][1], editbox.color['selected'][2], editbox.color['selected'][3], editbox.color['selected'][4]) or 
+    tocolor(editbox.color['default'][1], editbox.color['default'][2], editbox.color['default'][3], editbox.color['default'][4])), 
+    1, editbox.font, 
+    editbox.alingX, editbox.alingY, false, false, true
+);
 
+if (self.selected and (self.selected == editbox.id) and #editbox.text >= 1) then 
+    dxDrawLine(
+    editbox.startLine, 
+    y + (h / 4), 
+    editbox.startLine, 
+    y + (h / 1.4), 
+    tocolor(255, 255, 255), 1.3, true
+);
+end;
+
+if (editbox.selectedText) then 
+    dxDrawRectangle(
+    editbox.alingX == 'left' and x or (x + (w / 2) - (editbox.textWidth / 2)), 
+    y, editbox.textWidth, 
+    h, 
+    tocolor(0, 100, 255, 30), true
+);
+end;
+
+if (isCursorOnElement(x, y, w, h)) then 
+    self.button = editbox;
+elseif (not self.button) then 
+    self.button = false;
+end
+
+end;
+
+function Editbox:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
+    if (self.cache[id]) then return false end;
+    
     self.cache[id] = {
         id = id,
         text = '',
@@ -68,110 +91,79 @@ function Main:create(id, pos, defaultText, color, maxCharacter, password, number
         startLine = 0,
         textWidth = 0
     };
-
+    
+    if (not self.events) then 
+        addEventHandler('onClientClick', root, function(...) return Editbox:onClick(...) end);
+        addEventHandler('onClientCharacter', root, function(...) return Editbox:insertCharacter(...) end);
+        addEventHandler('onClientKey', root, function(...) return Editbox:clickKey(...) end);
+        
+        self.events = true;
+    end;
+    
     return self.cache[id];
 end;
 
-function Main:render()
-    for _, v in pairs(self.cache) do
-        if (v.visible) then 
-            dxDrawText(
-                (v.text == '' and v.defaultText or 
-                (v.password and string.gsub(v.text, '.', '*') or v.text)),
-                v.pos[1], v.pos[2], v.pos[3], v.pos[4], 
-                (v.selected and tocolor(v.color['selected'][1], v.color['selected'][2], v.color['selected'][3], v.color['selected'][4]) or 
-                tocolor(v.color['default'][1], v.color['default'][2], v.color['default'][3], v.color['default'][4])), 
-                1, v.font, 
-                v.alingX, v.alingY, true, false, true
-            );
-    
-            if (v.selected and #v.text >= 1) then 
-                dxDrawLine(
-                    v.startLine, 
-                    v.pos[2] + (v.pos[4] / 4), 
-                    v.startLine, 
-                    v.pos[2] + (v.pos[4] / 1.4), 
-                    tocolor(255, 255, 255), 1.3, true
-                );
-            end;
-            
-            if (v.selectedText) then 
-                dxDrawRectangle(
-                    v.alingX == 'left' and v.pos[1] or (v.pos[1] + (v.pos[3] / 2) - (v.textWidth / 2)), 
-                    v.pos[2], v.textWidth, 
-                    v.pos[4], 
-                    tocolor(0, 100, 255, 30), true
-                );
-            end;
-        end
-    end;
-end;
-
-function Main:click(b, s)
+function Editbox:onClick(b, s)
     if (b == 'left' and s == 'down') then
-        for i, v in pairs(self.cache) do
-            if isCursorOnElement(v.pos[1], v.pos[2], v.pos[3], v.pos[4]) then
-                if (self.selected) then 
-                    self.cache[self.selected].selected = false;
-                    self.cache[self.selected].selectedText = false;
-                end;
-                
-                v.selected = true;
-                self.selected = v.id;
-
-                return true;
-            else
-                v.selected = false;
-                v.selectedText = false;
-                self.selected = false;
-            end;
-
+        if (self.button and isCursorOnElement(self.button.pos[1], self.button.pos[2], self.button.pos[3], self.button.pos[4])) then 
+            if (self.selected and self.button['id'] ~= self.selected) then 
+                self.cache[self.selected].selected = false;
+                self.cache[self.selected].selectedText = false;
+            end
+            
+            self.selected = self.button.id;
+            self.cache[self.selected].selected = true;
+            return true;
+        elseif (self.selected) then 
+            self.cache[self.selected].selected = false;
+            self.cache[self.selected].selectedText = false;
+            self.selected = false;
         end;
     end;
 end;
 
-function Main:character(character)
-    if (not self.selected) then return false end ;
+function Editbox:insertCharacter(character)
+    if (not self.selected) then return false end;
     local self = self.cache[self.selected];
-
+    
     if (self) then 
         if (character == ' ') then return false end;
-
+        
         local textLength = #self.text;
         if (textLength >= self.maxCharacter) then return false end;
-
+        
         textLength = textLength + 1;
-
+        
         if (self.number) then 
             if (numbersKeys[character]) then 
                 self.text = utf8.insert(self.text, textLength, character);
             end;
-
+            
             return true;
         end;
-
+        
         if (textKeys[character]) then 
             self.text = utf8.insert(self.text, textLength, character);
         end;
-
+        
         self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
         if (self.alingX == 'left') then 
             self.startLine = self.pos[1] + (self.textWidth + 2);
         elseif (self.alingX == 'center') then 
             self.startLine = self.pos[1] + ((self.pos[3] / 2) + (self.textWidth / 2));
         end;
-
+        
         return true;
     end;
 end;
 
-function Main:clickKey(button, state)
+function Editbox:clickKey(button, state)
     if (not self.selected) then return false end;
     
     if (not state) then return false end
     local self = self.cache[self.selected];
     if (not self) then return false end;
-
+    
     local action = getKeyState('lctrl');
     if (button == 'a' and action) then 
         if (#self.text >= 1) then 
@@ -185,7 +177,7 @@ function Main:clickKey(button, state)
         end;
         
         self.text = utf8.remove(self.text, -1, -1);
-
+        
         self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
         if (self.alingX == 'left') then 
             self.startLine = self.pos[1] + (self.textWidth + 2);
@@ -193,66 +185,86 @@ function Main:clickKey(button, state)
             self.startLine = self.pos[1] + ((self.pos[3] / 2) + (self.textWidth / 2));
         end;
     end
-
+    
     return true;
 end;
 
-function Main:setAttribute(id, attribute, value) 
+function Editbox:setAttribute(id, attribute, value) 
     if (not self.cache[id]) then return false end;
-    if (not self.cache[id][attribute]) then return end;
-
+    if (not self.cache[id][attribute]) then return false end;
+    
     self.cache[id][attribute] = value;
     return self.cache[id];
 end
 
-function Main:get(id)
+function Editbox:get(id) 
     if (not self.cache[id]) then return false end;
-
+    
     return self.cache[id];
-end;
+end
 
-function Main:getAll()
+function Editbox:getAll()
     return self.cache;
-end;
+end
 
-function Main:delete(id)
+function Editbox:delete(id)
     if (not self.cache[id]) then return false end;
-
+    
     self.cache[id] = nil;
     return true;
 end;
 
-function Main:deleteAll()
+function Editbox:deleteAll()
     if (not self.cache) then return false end;
-
+    
     self.cache = {};
     self.selected = false;
     return true;
 end;
 
+
 --// Exports
 function createEditBox(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
-    return Main:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font);
+    return Editbox:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font);
 end;
 
 function getEditBox(id)
-    return Main:get(id);
+    return Editbox:get(id);
+end;
+
+function drawEditBox(id)
+    return Editbox:draw(id);
 end;
 
 function deleteEditBox(id) 
-    return Main:delete(id);
+    return Editbox:delete(id);
 end;
 
 function deleteAllEditBox(id) 
-    return Main:deleteAll();
+    return Editbox:deleteAll();
 end;
 
 function editBoxSetAttribute(id, attribute, value) 
-    return Main:setAttribute(id, attribute, value);
+    return Editbox:setAttribute(id, attribute, value);
 end;
 
 function getAllEditBox()
-    return Main:getAll();
+    return Editbox:getAll();
 end;
 
-Main:construction();
+Editbox:construction();
+
+--// Utils
+isCursorOnElement = function (absX, absY, width, height)
+    if (not isCursorShowing ( )) then
+        return false
+    end;
+    
+    local mx, my = getCursorPosition ( );
+    local cursorx, cursory = mx * screen.x, my * screen.y;
+    if (cursorx > absX and cursorx < absX + width and cursory > absY and cursory < absY + height) then
+        return true
+    else
+        return false
+    end
+end
