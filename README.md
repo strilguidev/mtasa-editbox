@@ -12,6 +12,21 @@ createEditBox(id, pos, defaultText, color, maxCharacter, password, number, aling
 createEditBox('user', {10, 10, 120, 50}, 'Type something...', {default = {255, 255, 255, 25}, selected = {255, 255, 255, 255}}, 25, false, false, 'center', 'center', 'default')
 ```
 
+``draw``
+##### To render an editbox on the screen (it must be inside an onClientRender).
+```lua
+drawEditBox(id)
+```
+##### Exemple:
+```lua
+-- Always create the editbox outside of the render
+createEditBox('user', {10, 10, 120, 50}, 'Type something...', {default = {255, 255, 255, 25}, selected = {255, 255, 255, 255}}, 25, false, false, 'center', 'center', 'default')
+
+addEventHandler('onClientRender', root, function()
+  drawEditBox('user');
+end);
+```
+
 ``delete``
 ##### Delete the instance.
 ```lua
