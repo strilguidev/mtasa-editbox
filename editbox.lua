@@ -126,35 +126,34 @@ function Editbox:insertCharacter(character)
     if (not self.selected) then return false end;
     local self = self.cache[self.selected];
     
-    if (self) then 
-        if (character == ' ') then return false end;
+    if (not self) then return false end;
+    if (character == ' ') then return false end;
         
-        local textLength = #self.text;
-        if (textLength >= self.maxCharacter) then return false end;
+    local textLength = #self.text;
+    if (textLength >= self.maxCharacter) then return false end;
         
-        textLength = textLength + 1;
+    textLength = textLength + 1;
         
-        if (self.number) then 
-            if (numbersKeys[character]) then 
-                self.text = utf8.insert(self.text, textLength, character);
-            end;
-            
-            return true;
-        end;
-        
-        if (textKeys[character]) then 
+    if (self.number) then 
+        if (numbersKeys[character]) then 
             self.text = utf8.insert(self.text, textLength, character);
         end;
-        
-        self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
-        if (self.alingX == 'left') then 
-            self.startLine = self.pos[1] + (self.textWidth + 2);
-        elseif (self.alingX == 'center') then 
-            self.startLine = self.pos[1] + ((self.pos[3] / 2) + (self.textWidth / 2));
-        end;
-        
+            
         return true;
     end;
+        
+    if (textKeys[character]) then 
+        self.text = utf8.insert(self.text, textLength, character);
+    end;
+        
+    self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
+    if (self.alingX == 'left') then 
+        self.startLine = self.pos[1] + (self.textWidth + 2);
+    elseif (self.alingX == 'center') then 
+        self.startLine = self.pos[1] + ((self.pos[3] / 2) + (self.textWidth / 2));
+    end;
+        
+    return true;
 end;
 
 function Editbox:clickKey(button, state)
@@ -252,7 +251,9 @@ function getAllEditBox()
     return Editbox:getAll();
 end;
 
-Editbox:construction();
+addEventHandler('onResourceClientRender', resourceRoot, function() 
+    return Editbox:construction();
+end);
 
 --// Utils
 isCursorOnElement = function (absX, absY, width, height)
