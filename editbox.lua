@@ -32,42 +32,40 @@ function Editbox:draw(id)
     
     local x, y, w, h = editbox.pos[1], editbox.pos[2], editbox.pos[3], editbox.pos[4];
     
-    
     dxDrawText(
-    (editbox.text == '' and editbox.defaultText or 
-    (editbox.password and string.gsub(editbox.text, '.', '*') or editbox.text)),
-    x, y, w, h, 
-    (editbox.selected and tocolor(editbox.color['selected'][1], editbox.color['selected'][2], editbox.color['selected'][3], editbox.color['selected'][4]) or 
-    tocolor(editbox.color['default'][1], editbox.color['default'][2], editbox.color['default'][3], editbox.color['default'][4])), 
-    1, editbox.font, 
-    editbox.alingX, editbox.alingY, false, false, true
-);
+        (editbox.text == '' and editbox.defaultText or 
+        (editbox.password and string.gsub(editbox.text, '.', '*') or editbox.text)),
+        x, y, w, h, 
+        (editbox.selected and tocolor(editbox.color['selected'][1], editbox.color['selected'][2], editbox.color['selected'][3], editbox.color['selected'][4]) or 
+        tocolor(editbox.color['default'][1], editbox.color['default'][2], editbox.color['default'][3], editbox.color['default'][4])), 
+        1, editbox.font, 
+        editbox.alingX, editbox.alingY, false, false, true
+    );
 
-if (self.selected and (self.selected == editbox.id) and #editbox.text >= 1) then 
-    dxDrawLine(
-    editbox.startLine, 
-    y + (h / 4), 
-    editbox.startLine, 
-    y + (h / 1.4), 
-    tocolor(255, 255, 255), 1.3, true
-);
-end;
+    if (self.selected and (self.selected == editbox.id) and #editbox.text >= 1) then 
+        dxDrawLine(
+            editbox.startLine, 
+            y + (h / 4), 
+            editbox.startLine, 
+            y + (h / 1.4), 
+            tocolor(255, 255, 255), 1.3, true
+        );
+    end;
 
-if (editbox.selectedText) then 
-    dxDrawRectangle(
-    editbox.alingX == 'left' and x or (x + (w / 2) - (editbox.textWidth / 2)), 
-    y, editbox.textWidth, 
-    h, 
-    tocolor(0, 100, 255, 30), true
-);
-end;
+    if (editbox.selectedText) then 
+        dxDrawRectangle(
+            editbox.alingX == 'left' and x or (x + (w / 2) - (editbox.textWidth / 2)), 
+            y, editbox.textWidth, 
+            h, 
+            tocolor(0, 100, 255, 30), true
+        );
+    end;
 
-if (isCursorOnElement(x, y, w, h)) then 
-    self.button = editbox;
-elseif (not self.button) then 
-    self.button = false;
-end
-
+    if (isCursorOnElement(x, y, w, h)) then 
+        self.button = editbox;
+    elseif (not self.button) then 
+        self.button = false;
+    end;
 end;
 
 function Editbox:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
@@ -125,34 +123,33 @@ end;
 function Editbox:insertCharacter(character)
     if (not self.selected) then return false end;
     local self = self.cache[self.selected];
+    if (self) then return false end;
     
-    if (not self) then return false end;
     if (character == ' ') then return false end;
-        
     local textLength = #self.text;
     if (textLength >= self.maxCharacter) then return false end;
-        
+    
     textLength = textLength + 1;
-        
+    
     if (self.number) then 
         if (numbersKeys[character]) then 
             self.text = utf8.insert(self.text, textLength, character);
         end;
-            
+        
         return true;
     end;
-        
+    
     if (textKeys[character]) then 
         self.text = utf8.insert(self.text, textLength, character);
     end;
-        
+    
     self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
     if (self.alingX == 'left') then 
         self.startLine = self.pos[1] + (self.textWidth + 2);
     elseif (self.alingX == 'center') then 
         self.startLine = self.pos[1] + ((self.pos[3] / 2) + (self.textWidth / 2));
     end;
-        
+    
     return true;
 end;
 
@@ -221,7 +218,6 @@ function Editbox:deleteAll()
     return true;
 end;
 
-
 --// Exports
 function createEditBox(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font)
     return Editbox:create(id, pos, defaultText, color, maxCharacter, password, number, alingX, alingY, font);
@@ -251,7 +247,7 @@ function getAllEditBox()
     return Editbox:getAll();
 end;
 
-addEventHandler('onResourceClientRender', resourceRoot, function() 
+addEventHandler('onResourceClientRender', resourceRoot, function()
     return Editbox:construction();
 end);
 
