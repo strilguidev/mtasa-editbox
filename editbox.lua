@@ -136,12 +136,10 @@ function Editbox:insertCharacter(character)
             if (numbersKeys[character]) then 
                 self.text = utf8.insert(self.text, textLength, character);
             end;
-            
-            return true;
-        end;
-        
-        if (textKeys[character]) then 
-            self.text = utf8.insert(self.text, textLength, character);
+        else
+            if (textKeys[character]) then 
+                self.text = utf8.insert(self.text, textLength, character);
+            end;
         end;
         
         self.textWidth = dxGetTextWidth((self.password and string.gsub(self.text, '.', '*') or self.text), 1, self.font);
