@@ -248,7 +248,7 @@ function getAllEditBox()
 end;
 
 addEventHandler('onResourceClientRender', resourceRoot, function()
-    return Editbox:construction();
+    Editbox:construction();
 end);
 
 --// Utils
